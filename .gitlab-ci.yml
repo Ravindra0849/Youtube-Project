@@ -63,4 +63,5 @@ Deploy the container:
   stage: deploy
   tags:
   - youtube
-  script: docker run --name youtube -d -p 3000:3000 $DOCKER_USERNAME/youtube:latest
+  script:
+  - docker run --name youtube -d -p 3000:3000 $DOCKER_USERNAME/youtube:latest

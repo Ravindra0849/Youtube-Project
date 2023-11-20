@@ -50,8 +50,8 @@ Note: this will be running on "Shared Runners".
 --> go to sonarqube --> click on manual --> give name as "youtube" --> select your branch name like main/master --> click on GitLab CI
 
 --> Create a "sonar-project.properties" file in your Project and paste the following code:
-    sonar.projectKey=youtube-app
-    sonar.qualitygate.wait=true
+    - sonar.projectKey=youtube-app
+    - sonar.qualitygate.wait=true
 
 --> Add environment variables
 
@@ -71,101 +71,101 @@ Note: this will be running on "Shared Runners".
 --> Uncheck the "Protect Variable" checkbox.
 --> Leave the "Mask Variable" checkbox unchecked.
 
-stages:
-    - npm
-    - sonar
+    stages:
+        - npm
+        - sonar
 
-install dependency:
-    stage: npm
-    image: 
-        name: node:16
-    script: 
-        - npm install 
+    install dependency:
+        stage: npm
+        image: 
+            name: node:16
+        script: 
+            - npm install 
 
-sonarqube-check:
-    stage: sonar
-    image: 
-        name: sonarsource/sonar-scanner-cli:latest
-        entrypoint: [""]
-    variables:
-        SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-        GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-    cache:
-        key: "${CI_JOB_NAME}"
-        paths:
-            - .sonar/cache
-    script: 
-        - sonar-scanner
-    allow_failure: true
-    only:
-        - master
+    sonarqube-check:
+        stage: sonar
+        image: 
+            name: sonarsource/sonar-scanner-cli:latest
+            entrypoint: [""]
+        variables:
+            SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+            GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+        cache:
+            key: "${CI_JOB_NAME}"
+            paths:
+                - .sonar/cache
+        script: 
+            - sonar-scanner
+        allow_failure: true
+        only:
+            - master
 
 --> Go to Docker hub --> click on settings --> click on security --> generate a Token here.
 
 --> Go to GitLab Settings --> Click on CI/CD --> Click on Variables --> add variables here like 
 
-    DOCKER_USERNAME this is key --> provide user name in value --> please make uncheck protect variable and ckeck masked variable
-    DOCKER_PASSWORD this is key --> provide token in value --> please make uncheck protect variable and ckeck masked variable
+    - DOCKER_USERNAME this is key --> provide user name in value --> please make uncheck protect variable and ckeck masked variable
+    - DOCKER_PASSWORD this is key --> provide token in value --> please make uncheck protect variable and ckeck masked variable
 
-stages:
-    - npm
-    - sonar
-    - trivy
-    - docker
-    - image scan
+    stages:
+        - npm
+        - sonar
+        - trivy
+        - docker
+        - image scan
 
-install dependency:
-    stage: npm
-    image: 
-        name: node:16
-    script: 
-        - npm install 
+    install dependency:
+        stage: npm
+        image: 
+            name: node:16
+        script: 
+            - npm install 
 
-sonarqube-check:
-    stage: sonar
-    image: 
-        name: sonarsource/sonar-scanner-cli:latest
-        entrypoint: [""]
-    variables:
-        SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-        GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-    cache:
-        key: "${CI_JOB_NAME}"
-        paths:
-            - .sonar/cache
-    script: 
-        - sonar-scanner
-    allow_failure: true
-    only:
-        - master
+    sonarqube-check:
+        stage: sonar
+        image: 
+            name: sonarsource/sonar-scanner-cli:latest
+            entrypoint: [""]
+        variables:
+            SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+            GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+        cache:
+            key: "${CI_JOB_NAME}"
+            paths:
+                - .sonar/cache
+        script: 
+            - sonar-scanner
+        allow_failure: true
+        only:
+            - master
 
-Trivy scanner:
-    stage: trivy
-    image:
-        name: aquasec/trivy:latest
-        entrypoint: [""]
-    script:
-        - trivy fs .
+    Trivy scanner:
+        stage: trivy
+        image:
+            name: aquasec/trivy:latest
+            entrypoint: [""]
+        script:
+            - trivy fs .
 
-Docker Build and Push:
-    stage: docker
-    image:
-        name: docker:latest
-    services:
-        - docker:dind
-    script:
-        - docker build --build-arg REACT_APP_RAPID_API_KEY=9b0ab58964msh154f05eb8c1f38dp1ac6eajsn8cfd4e5f83fe -t youtube . 
-        - docker tag youtube $DOCKER_USERNAME/youtube:latest
-        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        - docker push $DOCKER_USERNAME/youtube:latest
+    Docker Build and Push:
+        stage: docker
+        image:
+            name: docker:latest
+        services:
+            - docker:dind
+        script:
+            - docker build --build-arg REACT_APP_RAPID_API_KEY=9b0ab58964msh154f05eb8c1f38dp1ac6eajsn8cfd4e5f83fe -t youtube . 
+            - docker tag youtube $DOCKER_USERNAME/youtube:latest
+            - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            - docker push $DOCKER_USERNAME/youtube:latest
 
-Image Scanner:
-    stage: image scan
-    image:
-        name: aquasec/trivy:latest
-        entrypoint: [""]
-    script:
-        - trivy image $DOCKER_USERNAME/youtube:latest
+    Image Scanner:
+        stage: image scan
+        image:
+            name: aquasec/trivy:latest
+            entrypoint: [""]
+        script:
+            - trivy image $DOCKER_USERNAME/youtube:latest
 
 
 --> Go to docker hub and check image is pushed successfully or not
@@ -206,73 +206,73 @@ after completion of this we need to execute
 
 go back to .gitlab-ci.yml file
 
-stages:
-    - npm
-    - sonar
-    - trivy
-    - docker
-    - image scan
-    - deploy
+    stages:
+        - npm
+        - sonar
+        - trivy
+        - docker
+        - image scan
+        - deploy
 
-install dependency:
-    stage: npm
-    image: 
-        name: node:16
-    script: 
-        - npm install 
+    install dependency:
+        stage: npm
+        image:
+            name: node:16
+        script:
+            - npm install
 
-sonarqube-check:
-    stage: sonar
-    image: 
-        name: sonarsource/sonar-scanner-cli:latest
-        entrypoint: [""]
-    variables:
-        SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-        GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-    cache:
-        key: "${CI_JOB_NAME}"
-        paths:
-            - .sonar/cache
-    script: 
-        - sonar-scanner
-    allow_failure: true
-    only:
-        - master
+    sonarqube-check:
+        stage: sonar
+        image:
+            name: sonarsource/sonar-scanner-cli:latest
+            entrypoint: [""]
+        variables:
+            SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+            GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
+        cache:
+            key: "${CI_JOB_NAME}"
+            paths:
+                - .sonar/cache
+        script:
+            - sonar-scanner
+        allow_failure: true
+        only:
+            - master
 
-Trivy scanner:
-    stage: trivy
-    image:
-        name: aquasec/trivy:latest
-        entrypoint: [""]
-    script:
-        - trivy fs .
+    Trivy scanner:
+        stage: trivy
+        image:
+            name: aquasec/trivy:latest
+            entrypoint: [""]
+        script:
+            - trivy fs .
 
-Docker Build and Push:
-    stage: docker
-    image:
-        name: docker:latest
-    services:
-        - docker:dind
-    script:
-        - docker build --build-arg REACT_APP_RAPID_API_KEY=9b0ab58964msh154f05eb8c1f38dp1ac6eajsn8cfd4e5f83fe -t youtube . 
-        - docker tag youtube $DOCKER_USERNAME/youtube:latest
-        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        - docker push $DOCKER_USERNAME/youtube:latest
+    Docker Build and Push:
+        stage: docker
+        image:
+            name: docker:latest
+        services:
+            - docker:dind
+        script:
+            - docker build --build-arg REACT_APP_RAPID_API_KEY=9b0ab58964msh154f05eb8c1f38dp1ac6eajsn8cfd4e5f83fe -t youtube .
+            - docker tag youtube $DOCKER_USERNAME/youtube:latest
+            - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            - docker push $DOCKER_USERNAME/youtube:latest
 
-Image Scanner:
-    stage: image scan
-    image:
-        name: aquasec/trivy:latest
-        entrypoint: [""]
-    script:
-        - trivy image $DOCKER_USERNAME/youtube:latest
+    Image Scanner:
+        stage: image scan
+        image:
+            name: aquasec/trivy:latest
+            entrypoint: [""]
+        script:
+            - trivy image $DOCKER_USERNAME/youtube:latest
 
-Deploy the container:
-    stage: deploy
-    tags: 
-        - youtube
-    script:
-        docker run --name youtube -d -p 3000:3000 $DOCKER_USERNAME/youtube:latest
+    Deploy the container:
+        stage: deploy
+        tags:
+            - youtube
+        script: 
+            - docker run --name youtube -d -p 3000:3000 $DOCKER_USERNAME/youtube:latest
 
 --> It will automatically run the pipeline
 
@@ -283,9 +283,9 @@ Deploy the container:
 
 ==> uncomment like this 
 
-#if [ "$SHLVL" = 1 ]; then
-#    [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
-#fi
+    #if [ "$SHLVL" = 1 ]; then
+    #    [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
+    #fi
 
     - sudo gitlab-runner restart
     - exit #from root
